@@ -1,4 +1,4 @@
-# 기간별 datatable, 종목 업데이트 함수
+# 기간별 종목별 datatable 업데이트 함수
 # 기간을 입력하여 데이터를 호출한다.
 # 호출한 데이터를 datatable 형태로 입력한다.
 
@@ -43,7 +43,7 @@ for i in range(1, len(TICKER)):
 # 데이터타입(Date)변환 문제로 csv 저장 후, 다시 불러옵니다. (파일 경로 설정 필요!!)
 df = df.reset_index().rename(columns={"index": "id"})
 df.to_csv('pricevolume.csv', index=False, encoding='cp949')
-df = pd.read_csv('............/pricevolume.csv')
+df = pd.read_csv('...../pricevolume.csv')
 
 app = dash.Dash()
 
