@@ -1,4 +1,4 @@
-# 기간별 datatable 업데이트 함수
+# 기간별 datatable, 종목 업데이트 함수
 # 기간을 입력하여 데이터를 호출한다.
 # 호출한 데이터를 datatable 형태로 입력한다.
 
@@ -13,7 +13,7 @@ from datetime import date
 import pandas_datareader.data as web
 
 # TICKER를 입력합니다.
-TICKER = ['AAPL','TSLA','MSFT','GOOGL','FB','NVDA']
+TICKER = ['AAPL','TSLA','MSFT','AMZN','GOOGL','FB','NVDA', 'BABA', 'NFLX','XOM']
 
 start = date(2021, 1, 1)
 end = datetime.datetime.now()
@@ -43,24 +43,29 @@ for i in range(1, len(TICKER)):
 # 데이터타입(Date)변환 문제로 csv 저장 후, 다시 불러옵니다. (파일 경로 설정 필요!!)
 df = df.reset_index().rename(columns={"index": "id"})
 df.to_csv('pricevolume.csv', index=False, encoding='cp949')
-df = pd.read_csv('......../pricevolume.csv')
+df = pd.read_csv('............/pricevolume.csv')
 
 app = dash.Dash()
 
 app.layout = html.Div(
     [
+        html.H3("Get the 'TICKER' data you want!"),
         dcc.DatePickerRange(
             id="my-date-picker-range",
             min_date_allowed=date(2021, 1, 1),
             start_date_placeholder_text='2021-01-01',
-            end_date_placeholder_text='2021-01-11',
+            end_date_placeholder_text='2021-05-11',
             display_format='YYYY-MM-DD',
         ),
-        dcc.Dropdown(
-            id='dropdown_TICKER',
-            options=[{'label': s, 'value': s} for s in sorted(df.TICKER.unique())],
-            value='AAPL',
-            clearable=False),
+        html.Br(),
+        html.H3(["Your TICKER: "
+                 , dcc.Input(id='TICKER-input', value='AAPL', type='text')]),
+        html.Br(),
+        # dcc.Dropdown(
+        #     id='dropdown_TICKER',
+        #     options=[{'label': s, 'value': s} for s in sorted(df.TICKER.unique())],
+        #     value='AAPL',
+        #     clearable=False),
         dash_table.DataTable(
             id="datatable-interactivity",
             columns=[
@@ -71,7 +76,7 @@ app.layout = html.Div(
                     "selectable": True,
                     "hideable": True,
                 }
-                if i == "iso_alpha3" or i == "year" or i == "id"
+                if i == "High" or i == "Low" or i == "Open" or i == "Adj Close"
                 else {"name": i, "id": i, "deletable": True, "selectable": True}
                 for i in df.columns
             ],
@@ -93,15 +98,21 @@ app.layout = html.Div(
                 "maxWidth": 95,
                 "width": 95,
             },
-            style_cell_conditional=[  # align text columns to left. By default they are aligned to right
-                {"if": {"column_id": c}, "textAlign": "left"}
-                for c in ["country", "iso_alpha3"]
-            ],
             style_data={  # overflow cells' content into multiple lines
                 "whiteSpace": "normal",
                 "height": "auto",
             },
-        ),
+            style_data_conditional=[
+                {
+                    'if': {'row_index': 'odd'},
+                    'backgroundColor': 'rgb(248, 248, 248)'
+                }
+            ],
+            style_header={
+                'backgroundColor': 'rgb(230, 230, 230)',
+                'fontWeight': 'bold'
+            }
+        )
     ]
 )
 
@@ -115,7 +126,7 @@ def date_string_to_date(date_string):
     [
         dash.dependencies.Input("my-date-picker-range", "start_date"),
         dash.dependencies.Input("my-date-picker-range", "end_date"),
-        dash.dependencies.Input("dropdown_TICKER", "value")
+        dash.dependencies.Input("TICKER-input", "value")
     ],
 )
 def update_data(start_date, end_date, TICKER):
