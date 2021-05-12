@@ -13,7 +13,7 @@ from datetime import date
 import pandas_datareader.data as web
 
 # TICKER를 입력합니다.
-TICKER = ['AAPL']
+TICKER = ['AAPL','TSLA','MSFT','GOOGL','FB','NVDA']
 
 start = date(2021, 1, 1)
 end = datetime.datetime.now()
@@ -56,6 +56,11 @@ app.layout = html.Div(
             end_date_placeholder_text='2021-01-11',
             display_format='YYYY-MM-DD',
         ),
+        dcc.Dropdown(
+            id='dropdown_TICKER',
+            options=[{'label': s, 'value': s} for s in sorted(df.TICKER.unique())],
+            value='AAPL',
+            clearable=False),
         dash_table.DataTable(
             id="datatable-interactivity",
             columns=[
@@ -110,14 +115,16 @@ def date_string_to_date(date_string):
     [
         dash.dependencies.Input("my-date-picker-range", "start_date"),
         dash.dependencies.Input("my-date-picker-range", "end_date"),
+        dash.dependencies.Input("dropdown_TICKER", "value")
     ],
 )
-def update_data(start_date, end_date):
-    data = df.to_dict("records")
+def update_data(start_date, end_date, TICKER):
+    dff = df[df['TICKER']==TICKER]
+    data = dff.to_dict("records")
     if start_date and end_date:
-        mask = (date_string_to_date(df["Date"]) >= date_string_to_date(start_date)) & (
-            date_string_to_date(df["Date"]) <= date_string_to_date(end_date))
-        data = df.loc[mask].to_dict("records")
+        mask = (date_string_to_date(dff["Date"]) >= date_string_to_date(start_date)) & (
+            date_string_to_date(dff["Date"]) <= date_string_to_date(end_date))
+        data = dff.loc[mask].to_dict("records")
     return data
 
 
