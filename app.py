@@ -43,7 +43,7 @@ for i in range(1, len(TICKER)):
 # 데이터타입(Date)변환 문제로 csv 저장 후, 다시 불러옵니다. (파일 경로 설정 필요!!)
 df = df.reset_index().rename(columns={"index": "id"})
 df.to_csv('pricevolume.csv', index=False, encoding='cp949')
-df = pd.read_csv('....../pricevolume.csv')
+df = pd.read_csv('......../pricevolume.csv')
 
 app = dash.Dash()
 
@@ -120,6 +120,8 @@ def date_string_to_date(date_string):
 )
 def update_data(start_date, end_date, TICKER):
     dff = df[df['TICKER']==TICKER]
+    dff = dff.reset_index(drop=True)
+    dff.iloc[:, 1:9] = round(dff.iloc[:, 1:9], 2)
     data = dff.to_dict("records")
     if start_date and end_date:
         mask = (date_string_to_date(dff["Date"]) >= date_string_to_date(start_date)) & (
@@ -130,4 +132,4 @@ def update_data(start_date, end_date, TICKER):
 
 
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    app.run_server(debug=True, port=8060)
